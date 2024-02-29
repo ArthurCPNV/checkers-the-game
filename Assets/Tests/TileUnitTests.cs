@@ -6,20 +6,99 @@ using UnityEngine.TestTools;
 
 public class TileUnitTests
 {
-    // A Test behaves as an ordinary method
-    [Test]
-    public void TileUnitTestsSimplePasses()
+    private Tile tile;
+
+    [SetUp]
+    public void SetUp()
     {
-        // Use the Assert class to test conditions
+        tile = new Tile();
     }
 
-    // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-    // `yield return null;` to skip a frame.
-    [UnityTest]
-    public IEnumerator TileUnitTestsWithEnumeratorPasses()
+    #region Initialization Tests
+
+    [Test]
+    public void TileIsInitiallyEmpty()
     {
-        // Use the Assert class to test conditions.
-        // Use yield to skip a frame.
-        yield return null;
+        // Assert
+        Assert.IsNull(tile.OccupyingPiece);
     }
+
+    #endregion
+
+    #region Place Piece Tests
+
+    [Test]
+    public void PlaceWhitePieceSetsPieceOccupiedToWhitePiece()
+    {
+        // Act
+        tile.PlacePiece(new Piece(PieceTeam.White, PieceColor.White));
+
+        // Assert
+        Assert.IsNotNull(tile.OccupyingPiece);
+        Assert.AreEqual(PieceTeam.White, tile.OccupyingPiece.Team);
+        Assert.AreEqual(PieceColor.White, tile.OccupyingPiece.Color);
+        Assert.IsFalse(tile.OccupyingPiece.IsQueen);
+    }
+
+    [Test]
+    public void PlaceBlackQueenSetsPieceOccupiedToBlackQueen()
+    {
+        // Act
+        tile.PlacePiece(new Piece(PieceTeam.Black, PieceColor.Black, IsQueen: true));
+
+        // Assert
+        Assert.IsNotNull(tile.OccupyingPiece);
+        Assert.AreEqual(PieceTeam.Black, tile.OccupyingPiece.Team);
+        Assert.AreEqual(PieceColor.Black, tile.OccupyingPiece.Color);
+        Assert.IsTrue(tile.OccupyingPiece.IsQueen);
+    }
+
+    [Test]
+    public void PlaceWhiteQueenWithGreenColorSetsPieceOccupiedToWhiteQueenWithGreenColor()
+    {
+        // Act
+        tile.PlacePiece(new Piece(PieceTeam.White, PieceColor.Green, IsQueen: true));
+
+        // Assert
+        Assert.IsNotNull(tile.OccupyingPiece);
+        Assert.AreEqual(PieceTeam.White, tile.OccupyingPiece.Team);
+        Assert.AreEqual(PieceColor.Green, tile.OccupyingPiece.Color);
+        Assert.IsTrue(tile.OccupyingPiece.IsQueen);
+    }
+
+    [Test]
+    public void PlacePieceOnOccupiedTileThrowsError()
+    {
+        // Arrange
+        tile.PlacePiece(new Piece(PieceTeam.White, PieceColor.White));
+
+        // Act & Assert
+        Assert.Throws<InvalidPlaceOperationException>(() => tile.PlacePiece(new Piece(PieceTeam.Black, PieceColor.Black)));
+    }
+
+    #endregion
+
+    #region Remove Piece Tests
+
+    [Test]
+    public void RemovePieceSetsPieceOccupiedToNull()
+    {
+        // Arrange
+        tile.PlacePiece(new Piece(PieceTeam.White, PieceColor.White));
+
+        // Act
+        tile.RemovePiece();
+
+        // Assert
+        Assert.IsNull(tile.OccupyingPiece);
+    }
+
+    [Test]
+    public void RemovePieceFromEmptyTileDoesNotThrowError()
+    {
+        // Act & Assert
+        Assert.Throws<InvalidRemoveOperationException>(() => tile.RemovePiece());
+    }
+
+    #endregion
 }
