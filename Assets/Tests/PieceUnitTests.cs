@@ -6,20 +6,37 @@ using UnityEngine.TestTools;
 
 public class PieceUnitTests
 {
-    // A Test behaves as an ordinary method
-    [Test]
-    public void PieceUnitTestsSimplePasses()
+    private Piece piece;
+    private GameObject gameObject = new GameObject();
+
+    [SetUp]
+    public void SetUp()
     {
-        // Use the Assert class to test conditions
+        piece = new GameObject().AddComponent<Piece>();
     }
 
-    // A UnityTest behaves like a coroutine in Play Mode. In Edit Mode you can use
-    // `yield return null;` to skip a frame.
-    [UnityTest]
-    public IEnumerator PieceUnitTestsWithEnumeratorPasses()
+    [Test]
+    public void BlackPieceColorGreenInitializedSetsPieceToTeamBlackColorGreen()
     {
-        // Use the Assert class to test conditions.
-        // Use yield to skip a frame.
-        yield return null;
+        // Act
+        piece.Initialize(Team.Black, Color.green);
+
+        // Assert
+        Assert.AreEqual(Team.Black, piece.Team);
+        Assert.AreEqual(Color.green, piece.Color);
+        Assert.IsFalse(piece.IsQueen);
+    }
+
+    [Test]
+    public void QueeningPieceSetsPieceToQueen()
+    {
+        // Act
+        piece.Initialize(Team.White, Color.white);
+        piece.QueenPiece();
+
+        // Assert
+        Assert.AreEqual(Team.Black, piece.Team);
+        Assert.AreEqual(Color.green, piece.Color);
+        Assert.IsTrue(piece.IsQueen);
     }
 }

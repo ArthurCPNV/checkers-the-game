@@ -7,14 +7,14 @@ using UnityEngine.TestTools;
 public class TileUnitTests
 {
     private Tile tile;
+    private GameObject gameObject = new GameObject();
+
 
     [SetUp]
     public void SetUp()
     {
-        tile = new Tile();
+        tile = gameObject.AddComponent<Tile>();
     }
-
-    #region Initialization Tests
 
     [Test]
     public void TileIsInitiallyEmpty()
@@ -23,46 +23,57 @@ public class TileUnitTests
         Assert.IsNull(tile.OccupyingPiece);
     }
 
-    #endregion
-
-    #region Place Piece Tests
-
     [Test]
     public void PlaceWhitePieceSetsPieceOccupiedToWhitePiece()
     {
+        // Arrange
+        Piece newPiece = gameObject.AddComponent<Piece>();
+        newPiece.Initialize(Team.White, Color.white);
+
         // Act
-        tile.PlacePiece(new Piece(PieceTeam.White, PieceColor.White));
+        tile.PlacePiece(newPiece);
 
         // Assert
         Assert.IsNotNull(tile.OccupyingPiece);
-        Assert.AreEqual(PieceTeam.White, tile.OccupyingPiece.Team);
-        Assert.AreEqual(PieceColor.White, tile.OccupyingPiece.Color);
+        Assert.AreEqual(Team.White, tile.OccupyingPiece.Team);
+        Assert.AreEqual(Color.white, tile.OccupyingPiece.Color);
         Assert.IsFalse(tile.OccupyingPiece.IsQueen);
     }
 
     [Test]
     public void PlaceBlackQueenSetsPieceOccupiedToBlackQueen()
     {
+        // Arrange
+        Piece newPiece = gameObject.AddComponent<Piece>();
+        newPiece.Initialize(Team.Black, Color.black);
+
         // Act
-        tile.PlacePiece(new Piece(PieceTeam.Black, PieceColor.Black, IsQueen: true));
+
+        tile.PlacePiece(newPiece);
+        newPiece.QueenPiece();
 
         // Assert
         Assert.IsNotNull(tile.OccupyingPiece);
-        Assert.AreEqual(PieceTeam.Black, tile.OccupyingPiece.Team);
-        Assert.AreEqual(PieceColor.Black, tile.OccupyingPiece.Color);
+        Assert.AreEqual(Team.Black, tile.OccupyingPiece.Team);
+        Assert.AreEqual(Color.black, tile.OccupyingPiece.Color);
         Assert.IsTrue(tile.OccupyingPiece.IsQueen);
     }
 
     [Test]
     public void PlaceWhiteQueenWithGreenColorSetsPieceOccupiedToWhiteQueenWithGreenColor()
     {
+        // Arrange
+        Piece newPiece = gameObject.AddComponent<Piece>();
+        newPiece.Initialize(Team.White, Color.green);
+
         // Act
-        tile.PlacePiece(new Piece(PieceTeam.White, PieceColor.Green, IsQueen: true));
+        tile.PlacePiece(newPiece);
+        newPiece.QueenPiece();
 
         // Assert
         Assert.IsNotNull(tile.OccupyingPiece);
-        Assert.AreEqual(PieceTeam.White, tile.OccupyingPiece.Team);
-        Assert.AreEqual(PieceColor.Green, tile.OccupyingPiece.Color);
+        Assert.AreEqual(Team.White, tile.OccupyingPiece.Team);
+        Assert.AreEqual(Color.green, tile.OccupyingPiece.Color);
         Assert.IsTrue(tile.OccupyingPiece.IsQueen);
     }
 
@@ -70,21 +81,25 @@ public class TileUnitTests
     public void PlacePieceOnOccupiedTileThrowsError()
     {
         // Arrange
-        tile.PlacePiece(new Piece(PieceTeam.White, PieceColor.White));
+        Piece newPiece = gameObject.AddComponent<Piece>();
+        newPiece.Initialize(Team.White, Color.white);
+
+        Piece blackPiece = gameObject.AddComponent<Piece>();
+        blackPiece.Initialize(Team.Black, Color.black);
+
+        tile.PlacePiece(newPiece);
 
         // Act & Assert
-        Assert.Throws<InvalidPlaceOperationException>(() => tile.PlacePiece(new Piece(PieceTeam.Black, PieceColor.Black)));
+        Assert.Throws<InvalidPlaceOperationException>(() => tile.PlacePiece(blackPiece));
     }
-
-    #endregion
-
-    #region Remove Piece Tests
 
     [Test]
     public void RemovePieceSetsPieceOccupiedToNull()
     {
         // Arrange
-        tile.PlacePiece(new Piece(PieceTeam.White, PieceColor.White));
+        Piece newPiece = gameObject.AddComponent<Piece>();
+        newPiece.Initialize(Team.White, Color.white);
+        tile.PlacePiece(newPiece);
 
         // Act
         tile.RemovePiece();
@@ -99,6 +114,4 @@ public class TileUnitTests
         // Act & Assert
         Assert.Throws<InvalidRemoveOperationException>(() => tile.RemovePiece());
     }
-
-    #endregion
 }
