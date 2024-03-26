@@ -29,11 +29,13 @@ public class Piece : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHan
     private RectTransform _rectTransform;
     private CanvasGroup _canvasGroup;
     private GameObject _oldTile;
+    private GameManager _gameManager;
 
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
         _canvasGroup = GetComponent<CanvasGroup>();
+        _gameManager = GameManager.Instance;
     }
 
     private void Start()
@@ -62,8 +64,14 @@ public class Piece : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHan
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        _rectTransform.transform.parent.GetComponent<Tile>().RemovePiece();
         _oldTile = _rectTransform.transform.parent.gameObject;
+
+        if (_gameManager.TeamCurrentTurn != _team) 
+        {
+            return;
+        }
+
+        _rectTransform.transform.parent.GetComponent<Tile>().RemovePiece();
         _rectTransform.SetParent(_canvas.transform);
 
         _canvasGroup.blocksRaycasts = false;
@@ -71,6 +79,10 @@ public class Piece : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHan
 
     public void OnDrag(PointerEventData eventData)
     {
+        if (_gameManager.TeamCurrentTurn != _team)
+        {
+            return;
+        }
         _rectTransform.anchoredPosition += eventData.delta / _canvas.scaleFactor;
     }
 
@@ -78,18 +90,28 @@ public class Piece : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHan
     {
         _canvasGroup.blocksRaycasts = true;
 
-        if (_rectTransform.transform.parent == _canvas.transform) 
+        // If piece is still a parent of canvas, that means an invalid move was made. Resets the pieces position to its original state. 
+        if (_rectTransform.transform.parent == _canvas.transform || _gameManager.TeamCurrentTurn != _team) 
         {
             _rectTransform.transform.SetParent(_oldTile.transform);
             _rectTransform.anchoredPosition = _oldTile.GetComponent<RectTransform>().anchoredPosition;
             _rectTransform.localPosition = Vector3.zero;
+
+            _oldTile.GetComponent<Tile>().PlacePiece(_rectTransform.GetComponentInParent<Piece>());
+        }
+        else if (_rectTransform.transform.parent != _oldTile.transform)
+        {
+            _gameManager.switchTurns();
         }
     }
 
     /// <summary>
     /// Gets the team of the piece.
     /// </summary>
-    public Team Team { get; }
+    public Team Team 
+    { 
+        get { return _team; } 
+    }
 
     /// <summary>
     /// Gets the color of the piece.

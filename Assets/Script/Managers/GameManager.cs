@@ -8,6 +8,10 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Board board;
 
+    private Team _teamCurrentTurn = Team.White;
+
+    private static GameManager instance;
+
     public void StartPlayGame()
     {
         SceneManager.LoadSceneAsync("BoardGame");
@@ -24,5 +28,39 @@ public class GameManager : MonoBehaviour
         {
             board.InitializeBoard(10);
         }
+    }
+
+    public void switchTurns()
+    {
+        if (_teamCurrentTurn == Team.White)
+        {
+            _teamCurrentTurn = Team.Black;
+        }
+        else
+        {
+            _teamCurrentTurn = Team.White;
+        }
+    }
+
+    public static GameManager Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<GameManager>();
+                if (instance == null)
+                {
+                    GameObject gameObject = new GameObject("GameManager");
+                    instance = gameObject.AddComponent<GameManager>();
+                }
+            }
+            return instance;
+        }
+    }
+
+    public Team TeamCurrentTurn
+    {
+        get { return _teamCurrentTurn; }
     }
 }

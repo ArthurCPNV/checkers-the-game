@@ -95,6 +95,9 @@ public class Board : MonoBehaviour
         pieceRectTransform.anchoredPosition = tilePosition;
         pieceRectTransform.localPosition = Vector3.zero;
 
+        Image newPieceImage = newPiece.GetComponent<Image>();
+        newPieceImage.color = pieceColor;
+
         Tile tileScript = currentTile.GetComponent<Tile>();
         tileScript.PlacePiece(newPiece.GetComponent<Piece>());
 
@@ -122,7 +125,7 @@ public class Board : MonoBehaviour
                     {
                         if (i >= 0 && i < 4) 
                         {
-                            CreateNewPiece(currentTile, Team.Black, Color.black);
+                            CreateNewPiece(currentTile, Team.Black, Color.cyan);
                         }
                         else if(i > 5)
                         {
@@ -136,7 +139,7 @@ public class Board : MonoBehaviour
                     {
                         if (i >= 0 && i < 4)
                         {
-                            CreateNewPiece(currentTile, Team.Black, Color.black);
+                            CreateNewPiece(currentTile, Team.Black, Color.cyan);
                         }
                         else if (i > 5)
                         {

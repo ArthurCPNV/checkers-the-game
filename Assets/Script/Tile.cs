@@ -6,7 +6,10 @@ using UnityEngine.EventSystems;
 
 public class Tile : MonoBehaviour, IDropHandler
 {
-    private Piece _occupyingPiece { get; set; }
+    [SerializeField]
+    private Piece _occupyingPiece;
+
+
     private int _color;
 
     private RectTransform _rectTransform;
@@ -56,6 +59,11 @@ public class Tile : MonoBehaviour, IDropHandler
         {
             GameObject piece = eventData.pointerDrag;
             RectTransform pieceRectTransform = piece.GetComponent<RectTransform>();
+
+            if (piece.GetComponent<Piece>().Team != GameManager.Instance.TeamCurrentTurn)
+            {
+                return;
+            }
 
             if (_occupyingPiece == null)
             {
