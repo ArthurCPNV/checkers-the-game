@@ -9,14 +9,18 @@ public class Tile : MonoBehaviour, IDropHandler
     [SerializeField]
     private Piece _occupyingPiece;
 
-
     private int _color;
 
     private RectTransform _rectTransform;
+    private MoveValidatorManager _moveValidatorManager;
+    private GameManager _gameManager;
 
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
+
+        _moveValidatorManager = MoveValidatorManager.Instance;
+        _gameManager = GameManager.Instance;
     }
 
     public Piece OccupyingPiece
@@ -65,13 +69,64 @@ public class Tile : MonoBehaviour, IDropHandler
                 return;
             }
 
-            if (_occupyingPiece == null)
+            bool canPlacePieceOnTile = false;
+
+            GameObject[] possibleTiles = _moveValidatorManager.GetPossibleTiles;
+
+            foreach (var tile in possibleTiles)
+            {
+                if (tile != null)
+                {
+                    if (tile.Equals(gameObject))
+                    {
+                        canPlacePieceOnTile = true;
+                    }
+                }
+            }
+
+            if (_occupyingPiece == null && canPlacePieceOnTile)
             {
                 pieceRectTransform.anchoredPosition = _rectTransform.anchoredPosition;
                 pieceRectTransform.transform.SetParent(_rectTransform.transform);
                 pieceRectTransform.localPosition = Vector3.zero;
 
                 PlacePiece(piece.GetComponent<Piece>());
+
+                int tileIndexToRemovePiece = 0;
+
+                Piece pieceToRemove = null;
+
+                if (_moveValidatorManager.GetPieceToBeRemove != null)
+                {
+                    foreach (Tuple<int, Piece> pieceToRemoveTuple in _moveValidatorManager.GetPieceToBeRemove)
+                    {
+                        if (pieceToRemoveTuple != null)
+                        {
+                            tileIndexToRemovePiece = pieceToRemoveTuple.Item1;
+                            pieceToRemove = pieceToRemoveTuple.Item2;
+                        }
+
+                        if (pieceToRemove != null && possibleTiles[tileIndexToRemovePiece] == gameObject)
+                        {
+                            pieceToRemove.transform.parent.GetComponent<Tile>().RemovePiece();
+
+                            Destroy(pieceToRemove.gameObject);
+
+                            if (pieceToRemove.Team == Team.White)
+                            {
+                                _gameManager.AddScoreToTeam(Team.White);
+                                return;
+                            }
+                            else
+                            {
+                                _gameManager.AddScoreToTeam(Team.Black);
+                                return;
+                            }
+                        }
+                    }
+
+                    _moveValidatorManager.ResetPieceToBeRemoved();
+                }
             }
         }
     }

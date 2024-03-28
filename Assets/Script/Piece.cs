@@ -30,12 +30,14 @@ public class Piece : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHan
     private CanvasGroup _canvasGroup;
     private GameObject _oldTile;
     private GameManager _gameManager;
+    private MoveValidatorManager _moveValidatorManager;
 
     private void Awake()
     {
         _rectTransform = GetComponent<RectTransform>();
         _canvasGroup = GetComponent<CanvasGroup>();
         _gameManager = GameManager.Instance;
+        _moveValidatorManager = MoveValidatorManager.Instance;
     }
 
     private void Start()
@@ -71,6 +73,8 @@ public class Piece : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHan
             return;
         }
 
+        _moveValidatorManager.checkPossibleTiles(_oldTile, _team);
+
         _rectTransform.transform.parent.GetComponent<Tile>().RemovePiece();
         _rectTransform.SetParent(_canvas.transform);
 
@@ -89,6 +93,12 @@ public class Piece : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHan
     public void OnEndDrag(PointerEventData eventData)
     {
         _canvasGroup.blocksRaycasts = true;
+
+        if (_gameManager.TeamCurrentTurn == _team)
+        {
+            _moveValidatorManager.hidePossibleTiles();
+
+        }
 
         // If piece is still a parent of canvas, that means an invalid move was made. Resets the pieces position to its original state. 
         if (_rectTransform.transform.parent == _canvas.transform || _gameManager.TeamCurrentTurn != _team) 

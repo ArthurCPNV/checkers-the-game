@@ -17,6 +17,25 @@ public class Board : MonoBehaviour
     [SerializeField]
     private GameObject piecePrefab;
 
+    private static Board instance;
+
+    public static Board Instance
+    {
+        get
+        {
+            if (instance == null)
+            {
+                instance = FindObjectOfType<Board>();
+                if (instance == null)
+                {
+                    GameObject gameObject = new GameObject("GameManager");
+                    instance = gameObject.AddComponent<Board>();
+                }
+            }
+            return instance;
+        }
+    }
+
     private void Start()
     {
         if (SceneManager.GetActiveScene().name == "BoardGame")
@@ -40,7 +59,7 @@ public class Board : MonoBehaviour
             {
                 int current_iteration = i * _size + j;
 
-                Vector3 tilePosition = new Vector3(-315 + (j * 70), 315 + (i * -70), 0);
+                Vector3 tilePosition = new Vector3(-158 + (j * 35), 158 + (i * -35), 0);
                 GameObject newTile = Instantiate(tilePrefab, tileZoneObject.transform);
 
                 RectTransform rectTransform = newTile.GetComponent<RectTransform>();
@@ -125,7 +144,7 @@ public class Board : MonoBehaviour
                     {
                         if (i >= 0 && i < 4) 
                         {
-                            CreateNewPiece(currentTile, Team.Black, Color.cyan);
+                            CreateNewPiece(currentTile, Team.Black, Color.red);
                         }
                         else if(i > 5)
                         {
@@ -139,7 +158,7 @@ public class Board : MonoBehaviour
                     {
                         if (i >= 0 && i < 4)
                         {
-                            CreateNewPiece(currentTile, Team.Black, Color.cyan);
+                            CreateNewPiece(currentTile, Team.Black, Color.red);
                         }
                         else if (i > 5)
                         {
@@ -198,5 +217,13 @@ public class Board : MonoBehaviour
     public GameObject[] GetTiles
     {
         get => _tiles;
+    }
+
+    /// <summary>
+    /// Gets the size of the board.
+    /// </summary>
+    public int GetSize
+    {
+        get => _size;
     }
 }
